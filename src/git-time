@@ -1,0 +1,56 @@
+#!/usr/bin/env php
+<?php
+
+namespace GitTime;
+
+use Composer\Autoload\ClassLoader;
+
+/**
+ * @param null $baseDir
+ *
+ * @return ClassLoader
+ * @throws \Exception
+ */
+function resolveAutoloadPath($baseDir = null)
+{
+    if (null === $baseDir) {
+        $baseDir = dirname(__DIR__);
+    }
+
+    $autoloadPath = $baseDir.'/vendor/autoload.php';
+
+    // simple guess
+    if (file_exists($autoloadPath)) {
+        return require $autoloadPath;
+    }
+
+    $composerJsonPath = $baseDir.'/composer.json';
+
+    if (file_exists($composerJsonPath)) {
+        // guess hard!
+        $composerConfig = json_decode(file_get_contents($composerJsonPath), true);
+        if (isset( $composerJsonPath['config']['vendor-dir'] )) {
+            $autoloadPath = $baseDir.'/'.$composerJsonPath['config']['vendor-dir'].'/autoload.php';
+        }
+
+        if (file_exists($autoloadPath)) {
+            return require $autoloadPath;
+        }
+    }
+
+    if (dirname($baseDir) == $baseDir) {
+        throw new \Exception('composer.json and autoloader not found.');
+    }
+
+    return resolveAutoloadPath(dirname($baseDir));
+}
+
+resolveAutoloadPath();
+
+define('GIT_TIME_SRC_PATH', __DIR__);
+
+$app = new \GitTime\Console\Application('git-time', '0.1.0');
+
+$app->setDefaultCommand('estimate');
+
+$app->run();
