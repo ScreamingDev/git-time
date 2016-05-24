@@ -93,7 +93,7 @@ class EstimateCommand extends Command
                 $currentCommit['parent'] = '';
             }
 
-            $currentCommit['date'] = new \DateTime($currentCommit['date']);
+            $currentCommit['date']      = new \DateTime($currentCommit['date']);
             $currentCommit['comulated'] = $prevCommit['comulated'];
 
             // calculate invest by comparing against parent
@@ -104,11 +104,11 @@ class EstimateCommand extends Command
                 $findParent[] = $currentCommit['hash'].'~1';
                 $git->run($findParent);
 
-                $prevCommit         = array_combine(
+                $prevCommit              = array_combine(
                     array_slice($this->commitKeys, 1),
                     explode(' ', trim($git->getOutput()), 3)
                 );
-                $prevCommit['date'] = new \DateTime($prevCommit['date']);
+                $prevCommit['date']      = new \DateTime($prevCommit['date']);
                 $prevCommit['comulated'] = $currentCommit['comulated'];
             }
 
@@ -140,7 +140,7 @@ class EstimateCommand extends Command
                 [
                     $item['hash'],
                     $item['date']->format('Y-m-d H:i'),
-                    $item['subject'],
+                    trim($item['subject']),
                     gmdate("H:i:s", $item['invest']),
                     gmdate('H:i:s', $item['comulated']),
                 ]
