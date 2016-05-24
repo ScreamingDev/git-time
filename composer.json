@@ -1,6 +1,9 @@
 {
   "name": "sourcerer-mike/git-time",
   "version": "0.1.0",
+  "bin": [
+    "src/git-time"
+  ],
   "autoload": {
     "psr-4": {
       "GitTime\\": "src/GitTime"
