@@ -133,8 +133,8 @@ class EstimateCommand extends Command
                 'Hash',
                 'Date',
                 'Message',
-                "Duration\n(D:H:M)",
-                "Cumulated\n(D:H:M)",
+                "Duration",
+                "Cumulated",
             ]
         );
 
