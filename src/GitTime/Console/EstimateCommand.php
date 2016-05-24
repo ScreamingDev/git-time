@@ -133,8 +133,8 @@ class EstimateCommand extends Command
                 'Hash',
                 'Date',
                 'Message',
-                'Duration',
-                'Cumulated',
+                "Duration\n(D:H:M)",
+                "Cumulated\n(D:H:M)",
             ]
         );
 
@@ -144,8 +144,8 @@ class EstimateCommand extends Command
                     $item['hash'],
                     $item['date']->format('Y-m-d H:i'),
                     $this->limitMessage($item['subject']),
-                    gmdate("H:i:s", $item['invest']),
-                    gmdate('H:i:s', $item['cumulated']),
+                    $this->makeTimeFormat($item['invest']),
+                    $this->makeTimeFormat($item['cumulated']),
                 ]
             );
         }
@@ -216,8 +216,8 @@ class EstimateCommand extends Command
                                - 10 // border + hash
                                - 19 // border + date time
                                - 3 // message border and padding
-                               - 11 // border + duration
-                               - 12 // border + cumulative
+                               - 14 // border + duration
+                               - 14 // border + cumulative
         ;
 
         return $this->subjectLength;
@@ -239,5 +239,29 @@ class EstimateCommand extends Command
         }
 
         return $this->cliCols = $cliCols;
+    }
+
+    /**
+     * @param $timeFormat
+     * @param $timestamp
+     *
+     * @return mixed
+     */
+    protected function makeTimeFormat($timestamp)
+    {
+        $timeFormat = '';
+        if ($timestamp >= 86400) {
+            $timeFormat .= sprintf('%2dd ', gmdate('d', $timestamp) - 1);
+        }
+
+        if ($timestamp >= 3600) {
+            $timeFormat .= sprintf('%2dh ', gmdate('H', $timestamp));
+        }
+
+        $timeFormat .= sprintf('%2dm', max(1, gmdate('i', $timestamp)));
+
+        $timeFormat = str_pad($timeFormat, 11, ' ', STR_PAD_LEFT);
+
+        return $timeFormat;
     }
 }
