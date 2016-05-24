@@ -45,7 +45,7 @@ class EstimateCommand extends Command
         $topLevel = $this->getBaseDir();
 
 
-        $logArguments = ['log', '--pretty=%h %cI %s'];
+        $logArguments = ['log', '--no-merges', '--reverse', '--pretty=%p %h %cI %s'];
 
         if ($input->getOption('commits')) {
             $logArguments[] = $input->getOption('commits');
@@ -60,12 +60,13 @@ class EstimateCommand extends Command
         $git->run($logArguments);
         $log = explode(PHP_EOL, trim($git->getOutput()));
 
-        $commitKeys = ['hash', 'date', 'subject'];
+        $commitKeys = ['parent', 'hash', 'date', 'subject'];
 
         $dawnOfTime = new \DateTime();
         $dawnOfTime->setTimestamp(0);
 
         $prevCommit = [
+            'parent' => '',
             'hash' => '',
             'date' => $dawnOfTime,
             'subject' => '',
@@ -73,15 +74,24 @@ class EstimateCommand extends Command
         ];
 
         $logParsed = [];
+        $maxInvest = $input->getOption('max-invest');
+
+        $firstWithoutParent = true;
         foreach ($log as $commit) {
-            $currentCommit = array_combine($commitKeys, explode(' ', $commit, 3));
+            $currentCommit = array_combine($commitKeys, explode(' ', $commit, 4));
+
+            if ($firstWithoutParent) {
+                // first commit has no parent and needs different parsing
+                $currentCommit = array_combine(array_slice($commitKeys, 1), explode(' ', $commit, 3));
+                $firstWithoutParent = false;
+            }
+
             $currentCommit['date'] = new \DateTime($currentCommit['date']);
 
-            $currentCommit['invest'] = $currentCommit['date']->getTimestamp() - $prevCommit['date']->getTimestamp();
-
-            if ($currentCommit['invest'] > $input->getOption('max-invest')) {
-                $currentCommit['invest'] = $input->getOption('max-invest');
-            }
+            $currentCommit['invest'] = min(
+                $maxInvest,
+                $currentCommit['date']->getTimestamp() - $prevCommit['date']->getTimestamp()
+            );
 
             $currentCommit['comulated'] = $prevCommit['comulated'] + $currentCommit['invest'];
 
@@ -95,6 +105,7 @@ class EstimateCommand extends Command
             [
                 'Hash',
                 'Date',
+                'Message',
                 'Time taken',
                 'Comulated',
             ]
@@ -105,6 +116,7 @@ class EstimateCommand extends Command
                 [
                     $item['hash'],
                     $item['date']->format('Y-m-d H:i'),
+                    $item['subject'],
                     gmdate("H:i:s", $item['invest']),
                     gmdate('H:i:s', $item['comulated']),
                 ]
