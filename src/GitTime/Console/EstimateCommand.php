@@ -6,6 +6,7 @@ namespace GitTime\Console;
 use GitWrapper\GitWrapper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,8 +15,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class EstimateCommand extends Command
 {
     protected $baseDir = '';
+    protected $cliCols;
 
     protected $commitKeys = ['parent', 'hash', 'date', 'subject'];
+    protected $subjectLength;
 
     protected function configure()
     {
@@ -78,7 +81,7 @@ class EstimateCommand extends Command
             'hash'      => '',
             'date'      => $dawnOfTime,
             'subject'   => '',
-            'comulated' => 0,
+            'cumulated' => 0,
         ];
 
         $logParsed = [];
@@ -94,7 +97,7 @@ class EstimateCommand extends Command
             }
 
             $currentCommit['date']      = new \DateTime($currentCommit['date']);
-            $currentCommit['comulated'] = $prevCommit['comulated'];
+            $currentCommit['cumulated'] = $prevCommit['cumulated'];
 
             // calculate invest by comparing against parent
             if ($prevCommit['hash'] != $currentCommit['parent']) {
@@ -109,7 +112,7 @@ class EstimateCommand extends Command
                     explode(' ', trim($git->getOutput()), 3)
                 );
                 $prevCommit['date']      = new \DateTime($prevCommit['date']);
-                $prevCommit['comulated'] = $currentCommit['comulated'];
+                $prevCommit['cumulated'] = $currentCommit['cumulated'];
             }
 
             $currentCommit['invest'] = min(
@@ -117,7 +120,7 @@ class EstimateCommand extends Command
                 $currentCommit['date']->getTimestamp() - $prevCommit['date']->getTimestamp()
             );
 
-            $currentCommit['comulated'] = $prevCommit['comulated'] + $currentCommit['invest'];
+            $currentCommit['cumulated'] = $prevCommit['cumulated'] + $currentCommit['invest'];
 
             $logParsed[] = $currentCommit;
             $prevCommit  = $currentCommit;
@@ -130,8 +133,8 @@ class EstimateCommand extends Command
                 'Hash',
                 'Date',
                 'Message',
-                'Time taken',
-                'Comulated',
+                'Duration',
+                'Cumulated',
             ]
         );
 
@@ -140,9 +143,9 @@ class EstimateCommand extends Command
                 [
                     $item['hash'],
                     $item['date']->format('Y-m-d H:i'),
-                    trim($item['subject']),
+                    $this->limitMessage($item['subject']),
                     gmdate("H:i:s", $item['invest']),
-                    gmdate('H:i:s', $item['comulated']),
+                    gmdate('H:i:s', $item['cumulated']),
                 ]
             );
         }
@@ -187,5 +190,54 @@ class EstimateCommand extends Command
     protected function parseLogLine($commit)
     {
         return array_combine($this->commitKeys, explode(' ', trim($commit), 4));
+    }
+
+    /**
+     * @param $item
+     *
+     * @return mixed
+     */
+    protected function limitMessage($message)
+    {
+        return wordwrap($message, $this->getSubjectLength());
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getSubjectLength()
+    {
+        if ($this->subjectLength) {
+            return $this->subjectLength;
+        }
+
+        $this->subjectLength = $this->getCliCols()
+                               - 1 // right table border
+                               - 10 // border + hash
+                               - 19 // border + date time
+                               - 3 // message border and padding
+                               - 11 // border + duration
+                               - 12 // border + cumulative
+        ;
+
+        return $this->subjectLength;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getCliCols()
+    {
+        if ($this->cliCols) {
+            return $this->cliCols;
+        }
+
+        $cliCols = trim(exec('tput cols'));
+
+        if ( ! $cliCols) {
+            $cliCols = 80;
+        }
+
+        return $this->cliCols = $cliCols;
     }
 }
