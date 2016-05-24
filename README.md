@@ -2,7 +2,7 @@
 
 ## Estimate the time taken on a project or feature
 
-Check how long you took for that:
+Check how long you took for that?
 
     git-time estimate src/my-feature/foo.php
     
@@ -15,20 +15,14 @@ Check how long you took for that:
 
 The result will be shown in a table:
 
-    +---------+------------------+----------------------------------------------+------------+-----------+
-    | Hash    | Date             | Message                                      | Time taken | Summed up |
-    +---------+------------------+----------------------------------------------+------------+-----------+
-    | 18b978f | 2016-05-23 21:51 | initial empty commit                         | 00:30:00   | 00:30:00  |
-    | feced85 | 2016-05-24 07:52 | Estimate taken time with max cap             | 00:30:00   | 01:00:00  |
-    | d2c50ce | 2016-05-24 08:20 | Fetch parent commits                         | 00:27:28   | 01:27:28  |
-    | d21fd09 | 2016-05-24 08:38 | Calculate time related to parent commit.     | 00:18:01   | 01:45:29  |
-    | a7286a3 | 2016-05-24 08:47 | Correctly resolve parent                     | 00:09:21   | 01:54:50  |
-    | 0af37c2 | 2016-05-24 08:48 | Suppress spaces in table                     | 00:00:32   | 01:55:22  |
-    | 8e82704 | 2016-05-24 08:50 | Better check if current commit has no parent | 00:01:54   | 01:57:16  |
-    +---------+------------------+----------------------------------------------+------------+-----------+
-
-If a commit has no parent or the time can not be resolved, then it is shown as a 30 minute work as in the first lines.
-Change this with the `--max-invest` option in seconds (e.g. 900 for 15 minutes).
++---------+------------------+------------------------------------------+-------------+-------------+
+| Hash    | Date             | Message                                  | Duration    | Cumulated   |
++---------+------------------+------------------------------------------+-------------+-------------+
+| 18b978f | 2016-05-23 21:51 | initial empty commit                     |          1m |          1m |
+| feced85 | 2016-05-24 07:52 | Estimate taken time with max cap         |         30m |         31m |
+| d2c50ce | 2016-05-24 08:20 | Fetch parent commits                     |         28m |         59m |
+| d21fd09 | 2016-05-24 08:38 | Calculate time related to parent commit. |         19m |      1h 18m |
++---------+------------------+------------------------------------------+-------------+-------------+
 
 
 ## Why?
@@ -48,7 +42,7 @@ Imagine your history with these commits:
 
     Initial commit              second                 third          fourth
                 |                  |                     |               |
-                |----10 minutes----|------ ~7 days ------|---3 minutes---|
+                |--- 10 minutes ---|------ ~7 days ------|-- 3 minutes --|
                 |                  |                     |               |
     last week 12:00              12:10           today 10:20           10:23
     
@@ -69,11 +63,11 @@ Now `git-time` starts estimating the time you took for this project:
 
 As confusing as this sounds - `git-time` will give you a cleaner nicer look at this:
 
-    +---------+------------------+----------------------------------------------+-------------+-------------+
-    | Hash    | Date             | Message                                      | Duration    | Cumulated   |
-    +---------+------------------+----------------------------------------------+-------------+-------------+
-    | 18b978f | yesterday 12:00  | initial empty commit                         |          1m |          1m |
-    | feced85 | yesterday 12:10  | second                                       |         10m |         11m |
-    | d2c50ce | today 10:20      | third                                        |         30m |         41m |
-    | d21fd09 | today 15:23      | fourth                                       |          3m |         44m |
-    +---------+------------------+----------------------------------------------+-------------+-------------+
+    +---------+------------------+----------------------+-------------+-------------+
+    | Hash    | Date             | Message              | Duration    | Cumulated   |
+    +---------+------------------+----------------------+-------------+-------------+
+    | 18b978f | yesterday 12:00  | initial empty commit |          1m |          1m |
+    | feced85 | yesterday 12:10  | second               |         10m |         11m |
+    | d2c50ce | today 10:20      | third                |         30m |         41m |
+    | d21fd09 | today 15:23      | fourth               |          3m |         44m |
+    +---------+------------------+----------------------+-------------+-------------+
