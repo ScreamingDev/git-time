@@ -49,7 +49,6 @@ class EstimateCommand extends Command
 
         $topLevel = $this->getBaseDir();
 
-
         $defaultLogArguments = ['log', '--no-merges', '--reverse'];
         $logArguments        = $defaultLogArguments;
         $logArguments[]      = '--pretty=%p %h %cI %s';
@@ -119,6 +118,11 @@ class EstimateCommand extends Command
                 $maxInvest,
                 $currentCommit['date']->getTimestamp() - $prevCommit['date']->getTimestamp()
             );
+
+            // round seconds to one minute
+            if ($currentCommit['invest'] % 60) {
+                $currentCommit['invest'] += 60 - ($currentCommit['invest'] % 60);
+            }
 
             $currentCommit['cumulated'] = $prevCommit['cumulated'] + $currentCommit['invest'];
 
@@ -258,7 +262,7 @@ class EstimateCommand extends Command
             $timeFormat .= sprintf('%2dh ', gmdate('H', $timestamp));
         }
 
-        $timeFormat .= sprintf('%2dm', max(1, gmdate('i', $timestamp)));
+        $timeFormat .= sprintf('%2dm', gmdate('i', $timestamp));
 
         $timeFormat = str_pad($timeFormat, 11, ' ', STR_PAD_LEFT);
 
