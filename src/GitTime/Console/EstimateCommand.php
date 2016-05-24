@@ -51,7 +51,7 @@ class EstimateCommand extends Command
         $logArguments        = $defaultLogArguments;
         $logArguments[]      = '--pretty=%p %h %cI %s';
 
-        $parentLogArguments = $defaultLogArguments;
+        $parentLogArguments   = $defaultLogArguments;
         $parentLogArguments[] = '--pretty=%h %cI %s';
         $parentLogArguments[] = '-1';
 
@@ -60,15 +60,15 @@ class EstimateCommand extends Command
         }
 
         if ($input->getArgument('path')) {
-            $logArguments[] = $input->getArgument('path');
+            foreach ($input->getArgument('path') as $fileName) {
+                $logArguments[] = $fileName;
+            }
         }
 
         $git = $this->getGit();
         $git->clearOutput();
         $git->run($logArguments);
         $log = explode(PHP_EOL, trim($git->getOutput()));
-
-        $this->commitKeys = $this->commitKeys;
 
         $dawnOfTime = new \DateTime();
         $dawnOfTime->setTimestamp(0);
@@ -84,19 +84,17 @@ class EstimateCommand extends Command
         $logParsed = [];
         $maxInvest = $input->getOption('max-invest');
 
-        $firstWithoutParent = true;
         foreach ($log as $commit) {
             $currentCommit = $this->parseLogLine($commit);
 
-            if ($firstWithoutParent) {
-                // first commit has no parent and needs different parsing
+            if ( ! preg_match('@[a-f0-9]*@', $currentCommit['hash'])) {
+                // commit has no parent and needs different parsing
                 $currentCommit           = array_combine(array_slice($this->commitKeys, 1), explode(' ', $commit, 3));
                 $currentCommit['parent'] = '';
-
-                $firstWithoutParent = false;
             }
 
             $currentCommit['date'] = new \DateTime($currentCommit['date']);
+            $currentCommit['comulated'] = $prevCommit['comulated'];
 
             // calculate invest by comparing against parent
             if ($prevCommit['hash'] != $currentCommit['parent']) {
@@ -106,8 +104,12 @@ class EstimateCommand extends Command
                 $findParent[] = $currentCommit['hash'].'~1';
                 $git->run($findParent);
 
-                $prevCommit = array_combine(array_slice($this->commitKeys, 1), explode(' ', trim($git->getOutput()), 3));
+                $prevCommit         = array_combine(
+                    array_slice($this->commitKeys, 1),
+                    explode(' ', trim($git->getOutput()), 3)
+                );
                 $prevCommit['date'] = new \DateTime($prevCommit['date']);
+                $prevCommit['comulated'] = $currentCommit['comulated'];
             }
 
             $currentCommit['invest'] = min(
