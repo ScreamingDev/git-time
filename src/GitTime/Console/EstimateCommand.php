@@ -87,7 +87,7 @@ class EstimateCommand extends Command
         foreach ($log as $commit) {
             $currentCommit = $this->parseLogLine($commit);
 
-            if ( ! preg_match('@[a-f0-9]*@', $currentCommit['hash'])) {
+            if ( ! preg_match('@^[a-f0-9]{3,}$@', $currentCommit['hash'])) {
                 // commit has no parent and needs different parsing
                 $currentCommit           = array_combine(array_slice($this->commitKeys, 1), explode(' ', $commit, 3));
                 $currentCommit['parent'] = '';
