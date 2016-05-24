@@ -69,5 +69,5 @@ As confusing as this sounds - `git-time` will give you a cleaner nicer look at t
     | 18b978f | yesterday 12:00  | initial empty commit |          1m |          1m |
     | feced85 | yesterday 12:10  | second               |         10m |         11m |
     | d2c50ce | today 10:20      | third                |         30m |         41m |
-    | d21fd09 | today 15:23      | fourth               |          3m |         44m |
+    | d21fd09 | today 10:23      | fourth               |          3m |         44m |
     +---------+------------------+----------------------+-------------+-------------+
