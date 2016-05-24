@@ -15,6 +15,8 @@ class EstimateCommand extends Command
 {
     protected $baseDir = '';
 
+    protected $commitKeys = ['parent', 'hash', 'date', 'subject'];
+
     protected function configure()
     {
         $this->addArgument(
@@ -45,7 +47,13 @@ class EstimateCommand extends Command
         $topLevel = $this->getBaseDir();
 
 
-        $logArguments = ['log', '--no-merges', '--reverse', '--pretty=%p %h %cI %s'];
+        $defaultLogArguments = ['log', '--no-merges', '--reverse'];
+        $logArguments        = $defaultLogArguments;
+        $logArguments[]      = '--pretty=%p %h %cI %s';
+
+        $parentLogArguments = $defaultLogArguments;
+        $parentLogArguments[] = '--pretty=%h %cI %s';
+        $parentLogArguments[] = '-1';
 
         if ($input->getOption('commits')) {
             $logArguments[] = $input->getOption('commits');
@@ -60,16 +68,16 @@ class EstimateCommand extends Command
         $git->run($logArguments);
         $log = explode(PHP_EOL, trim($git->getOutput()));
 
-        $commitKeys = ['parent', 'hash', 'date', 'subject'];
+        $this->commitKeys = $this->commitKeys;
 
         $dawnOfTime = new \DateTime();
         $dawnOfTime->setTimestamp(0);
 
         $prevCommit = [
-            'parent' => '',
-            'hash' => '',
-            'date' => $dawnOfTime,
-            'subject' => '',
+            'parent'    => '',
+            'hash'      => '',
+            'date'      => $dawnOfTime,
+            'subject'   => '',
             'comulated' => 0,
         ];
 
@@ -78,15 +86,29 @@ class EstimateCommand extends Command
 
         $firstWithoutParent = true;
         foreach ($log as $commit) {
-            $currentCommit = array_combine($commitKeys, explode(' ', $commit, 4));
+            $currentCommit = $this->parseLogLine($commit);
 
             if ($firstWithoutParent) {
                 // first commit has no parent and needs different parsing
-                $currentCommit = array_combine(array_slice($commitKeys, 1), explode(' ', $commit, 3));
+                $currentCommit           = array_combine(array_slice($this->commitKeys, 1), explode(' ', $commit, 3));
+                $currentCommit['parent'] = '';
+
                 $firstWithoutParent = false;
             }
 
             $currentCommit['date'] = new \DateTime($currentCommit['date']);
+
+            // calculate invest by comparing against parent
+            if ($prevCommit['hash'] != $currentCommit['parent']) {
+                // commits are not lined up: find parent
+                $git->clearOutput();
+                $findParent   = $parentLogArguments;
+                $findParent[] = $currentCommit['hash'].'~1';
+                $git->run($findParent);
+
+                $prevCommit = array_combine(array_slice($this->commitKeys, 1), explode(' ', trim($git->getOutput()), 3));
+                $prevCommit['date'] = new \DateTime($prevCommit['date']);
+            }
 
             $currentCommit['invest'] = min(
                 $maxInvest,
@@ -96,7 +118,7 @@ class EstimateCommand extends Command
             $currentCommit['comulated'] = $prevCommit['comulated'] + $currentCommit['invest'];
 
             $logParsed[] = $currentCommit;
-            $prevCommit = $currentCommit;
+            $prevCommit  = $currentCommit;
         }
 
         $table = new Table($output);
@@ -153,5 +175,15 @@ class EstimateCommand extends Command
         $git        = $gitWrapper->workingCopy(getcwd());
 
         return $git;
+    }
+
+    /**
+     * @param $commit
+     *
+     * @return mixed
+     */
+    protected function parseLogLine($commit)
+    {
+        return array_combine($this->commitKeys, explode(' ', trim($commit), 4));
     }
 }
