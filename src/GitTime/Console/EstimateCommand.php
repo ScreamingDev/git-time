@@ -39,8 +39,16 @@ class EstimateCommand extends Command
             'max-invest',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Maximum time to add to a commit.',
+            'Maximum time to add to a commit',
             1800
+        );
+
+        $this->addOption(
+            'no-parent-time',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Time to assign to commits without a parent',
+            1
         );
     }
 
@@ -114,10 +122,14 @@ class EstimateCommand extends Command
                 $prevCommit['cumulated'] = $currentCommit['cumulated'];
             }
 
-            $currentCommit['invest'] = min(
-                $maxInvest,
-                $currentCommit['date']->getTimestamp() - $prevCommit['date']->getTimestamp()
-            );
+            $currentCommit['invest'] = $input->getOption('no-parent-time');
+
+            if ($currentCommit['parent']) {
+                $currentCommit['invest'] = min(
+                    $maxInvest,
+                    $currentCommit['date']->getTimestamp() - $prevCommit['date']->getTimestamp()
+                );
+            }
 
             // round seconds to one minute
             if ($currentCommit['invest'] % 60) {
