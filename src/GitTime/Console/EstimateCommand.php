@@ -61,8 +61,7 @@ class EstimateCommand extends Command
             'since',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Time range to work with (e.g. "yesterday", "00:00" o\'clock or "2016-05-25")',
-            1
+            'Time range to work with (e.g. "yesterday", "00:00" o\'clock or "2016-05-25")'
         );
     }
 
