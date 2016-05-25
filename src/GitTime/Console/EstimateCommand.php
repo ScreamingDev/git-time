@@ -24,21 +24,21 @@ class EstimateCommand extends Command
         $this->addArgument(
             'path',
             InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
-            'Path or files to check.'
+            'Path or files to check'
         );
 
         $this->addOption(
             'author',
             null,
             InputOption::VALUE_OPTIONAL,
-            'History to look in between like 070816..HEAD or 15feb89..060414 .'
+            'Name of an author to sum up only his time'
         );
 
         $this->addOption(
             'commits',
             null,
             InputOption::VALUE_OPTIONAL,
-            'History to look in between like 070816..HEAD or 15feb89..060414 .'
+            'History to look in between like 070816..HEAD or 15feb89..060414'
         );
 
         $this->addOption(
@@ -54,6 +54,14 @@ class EstimateCommand extends Command
             null,
             InputOption::VALUE_OPTIONAL,
             'Time to assign to commits without a parent',
+            1
+        );
+
+        $this->addOption(
+            'since',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Time range to work with (e.g. "yesterday", "00:00" o\'clock or "2016-05-25")',
             1
         );
     }
@@ -72,7 +80,11 @@ class EstimateCommand extends Command
         $parentLogArguments[] = '-1';
 
         if ($input->getOption('author')) {
-            $logArguments[] = '--author=' . $input->getOption('author');
+            $logArguments[] = '--author='.$input->getOption('author');
+        }
+
+        if ($input->getOption('since')) {
+            $logArguments[] = '--since='.$input->getOption('since');
         }
 
         if ($input->getOption('commits')) {
@@ -145,7 +157,7 @@ class EstimateCommand extends Command
 
             // round seconds to one minute
             if ($currentCommit['invest'] % 60) {
-                $currentCommit['invest'] += 60 - ($currentCommit['invest'] % 60);
+                $currentCommit['invest'] += 60 - ( $currentCommit['invest'] % 60 );
             }
 
             $currentCommit['cumulated'] = $prevCommit['cumulated'] + $currentCommit['invest'];

@@ -12,8 +12,8 @@ Check how long you took for that?
     # or both
     git-time estimate 13ea7dd..HEAD  src/my-feature/foo.php
     
-    # for a single author (maybe for you to clock at work)
-    git-time estimate --author "Mike Pretzlaw"
+    # for a particular time range (e.g. today) and a single author(maybe for you to clock at work)
+    git-time estimate --since 00:00 --author "Mike Pretzlaw"
 
 
 The result will be shown in a table:
