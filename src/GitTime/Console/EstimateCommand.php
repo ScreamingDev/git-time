@@ -84,7 +84,7 @@ class EstimateCommand extends Command
         }
 
         if ($input->getOption('since')) {
-            $logArguments[] = '--since='.$input->getOption('since');
+            $logArguments[] = '--since='. escapeshellarg($input->getOption('since'));
         }
 
         if ($input->getOption('commits')) {
