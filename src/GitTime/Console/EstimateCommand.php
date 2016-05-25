@@ -6,7 +6,6 @@ namespace GitTime\Console;
 use GitWrapper\GitWrapper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -104,6 +103,14 @@ class EstimateCommand extends Command
 
         $logParsed = [];
         $maxInvest = $input->getOption('max-invest');
+
+        // remove all empty lines, otherwise the parser will crash
+        $log = array_filter($log);
+
+        if ( ! $log) {
+            $output->writeln('No commit found.');
+            exit;
+        }
 
         foreach ($log as $commit) {
             $currentCommit = $this->parseLogLine($commit);
