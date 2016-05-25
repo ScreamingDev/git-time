@@ -29,6 +29,13 @@ class EstimateCommand extends Command
         );
 
         $this->addOption(
+            'author',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'History to look in between like 070816..HEAD or 15feb89..060414 .'
+        );
+
+        $this->addOption(
             'commits',
             null,
             InputOption::VALUE_OPTIONAL,
@@ -65,6 +72,10 @@ class EstimateCommand extends Command
         $parentLogArguments[] = '--pretty=%h %cI %s';
         $parentLogArguments[] = '-1';
 
+        if ($input->getOption('author')) {
+            $logArguments[] = '--author=' . $input->getOption('author');
+        }
+
         if ($input->getOption('commits')) {
             $logArguments[] = $input->getOption('commits');
         }
@@ -96,12 +107,6 @@ class EstimateCommand extends Command
 
         foreach ($log as $commit) {
             $currentCommit = $this->parseLogLine($commit);
-
-            if ( ! preg_match('@^[a-f0-9]{3,}$@', $currentCommit['hash'])) {
-                // commit has no parent and needs different parsing
-                $currentCommit           = array_combine(array_slice($this->commitKeys, 1), explode(' ', $commit, 3));
-                $currentCommit['parent'] = '';
-            }
 
             $currentCommit['date']      = new \DateTime($currentCommit['date']);
             $currentCommit['cumulated'] = $prevCommit['cumulated'];
@@ -205,6 +210,16 @@ class EstimateCommand extends Command
      */
     protected function parseLogLine($commit)
     {
+        $tmp = explode(' ', trim($commit), 3);
+
+        if ( ! preg_match('@^[a-f0-9]{3,}$@', $tmp[1])) {
+            // commit has no parent and needs different parsing
+            $currentCommit           = array_combine(array_slice($this->commitKeys, 1), explode(' ', $commit, 3));
+            $currentCommit['parent'] = '';
+
+            return $currentCommit;
+        }
+
         return array_combine($this->commitKeys, explode(' ', trim($commit), 4));
     }
 
