@@ -5,6 +5,7 @@ namespace GitTime\Console;
 
 use GitWrapper\GitWrapper;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -58,6 +59,13 @@ class EstimateCommand extends Command
         );
 
         $this->addOption(
+            'progress',
+            null,
+            InputOption::VALUE_NONE,
+            'Show progressbar while working'
+        );
+
+        $this->addOption(
             'since',
             null,
             InputOption::VALUE_OPTIONAL,
@@ -99,7 +107,9 @@ class EstimateCommand extends Command
         $git = $this->getGit();
         $git->clearOutput();
         $git->run($logArguments);
+
         $log = explode(PHP_EOL, trim($git->getOutput()));
+        $log = array_filter($log); // no empty lines
 
         $dawnOfTime = new \DateTime();
         $dawnOfTime->setTimestamp(0);
@@ -123,7 +133,16 @@ class EstimateCommand extends Command
             exit;
         }
 
+        $totalTime = 0;
+
+        if ($input->getOption('progress')) {
+            $progressBar = new ProgressBar($output, count($log)+1);
+        }
+
         foreach ($log as $commit) {
+            if ($input->getOption('progress')) {
+                $progressBar->advance();
+            }
             $currentCommit = $this->parseLogLine($commit);
 
             $currentCommit['date']      = new \DateTime($currentCommit['date']);
@@ -160,36 +179,46 @@ class EstimateCommand extends Command
             }
 
             $currentCommit['cumulated'] = $prevCommit['cumulated'] + $currentCommit['invest'];
+            $totalTime = $currentCommit['cumulated'];
 
             $logParsed[] = $currentCommit;
             $prevCommit  = $currentCommit;
         }
 
-        $table = new Table($output);
-
-        $table->setHeaders(
-            [
-                'Hash',
-                'Date',
-                'Message',
-                "Duration",
-                "Cumulated",
-            ]
-        );
-
-        foreach ($logParsed as $item) {
-            $table->addRow(
-                [
-                    $item['hash'],
-                    $item['date']->format('Y-m-d H:i'),
-                    $this->limitMessage($item['subject']),
-                    $this->makeTimeFormat($item['invest']),
-                    $this->makeTimeFormat($item['cumulated']),
-                ]
-            );
+        if ($input->getOption('progress')) {
+            $progressBar->finish();
+            $progressBar->clear();
         }
 
-        $table->render();
+        if ($output->isVerbose()) {
+            $table = new Table($output);
+
+            $table->setHeaders(
+                [
+                    'Hash',
+                    'Date',
+                    'Message',
+                    "Duration",
+                    "Cumulated",
+                ]
+            );
+
+            foreach ($logParsed as $item) {
+                $table->addRow(
+                    [
+                        $item['hash'],
+                        $item['date']->format('Y-m-d H:i'),
+                        $this->limitMessage($item['subject']),
+                        $this->makeTimeFormat($item['invest']),
+                        $this->makeTimeFormat($item['cumulated']),
+                    ]
+                );
+            }
+
+            $table->render();
+        }
+
+        $output->writeln('Total time: ' . $this->makeTimeFormat($totalTime));
     }
 
     /**
