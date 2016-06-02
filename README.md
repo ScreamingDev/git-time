@@ -13,7 +13,7 @@ Check how long you took for that?
     git-time estimate 13ea7dd..HEAD  src/my-feature/foo.php
     
     # for a particular time range (e.g. today) and a single author(maybe for you to clock at work)
-    git-time estimate --since 00:00 --author "Mike Pretzlaw"
+    git-time estimate -v --since 00:00 --author "Mike Pretzlaw"
 
 
 The result will be shown in a table:
@@ -64,7 +64,7 @@ Now `git-time` starts estimating the time you took for this project:
   Right **3 minutes** after the previous one and this will make 44 minutes in total for this project.
   Pretty small one.
 
-As confusing as this sounds - `git-time` will give you a cleaner nicer look at this:
+As confusing as this sounds - `git-time -v` will give you a cleaner nicer look at this:
 
     +---------+------------------+----------------------+-------------+-------------+
     | Hash    | Date             | Message              | Duration    | Cumulated   |
