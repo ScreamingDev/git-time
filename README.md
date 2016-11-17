@@ -40,18 +40,12 @@ Might be all. Did I miss something?
 
 ## Installation
 
-Global composer package (`composer global require sourcerer-mike/git-time`) or ...
+Works best as global composer package:
 
-    mkdir ~/opt
-    cd ~/opt
-    git clone https://github.com/sourcerer-mike/git-time.git
-      
-    # optional:
-    mkdir ~/bin
-    ln -s ~/opt/git-time/src/git-time ~/bin/git-time
-  
-Restart terminal and run `git-time` or `~/bin/git-time`.
+    composer global require sourcerer-mike/git-time:dev-master
 
+or local installation per project (`composer require sourcerer-mike/git-time:dev-master`).
+You might like to add ` ~/.config/composer/vendor/bin/` to your PATH variable in Bash ;)
 
 ## How it works
 
