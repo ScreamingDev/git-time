@@ -42,13 +42,13 @@ Might be all. Did I miss something?
 
 Global composer package or ...
 
-  mkdir ~/opt
-  cd ~/opt
-  git clone https://github.com/sourcerer-mike/git-time.git
-  
-  # optional:
-  mkdir ~/bin
-  ln -s ~/opt/git-time/src/git-time ~/bin/git-time
+    mkdir ~/opt
+    cd ~/opt
+    git clone https://github.com/sourcerer-mike/git-time.git
+      
+    # optional:
+    mkdir ~/bin
+    ln -s ~/opt/git-time/src/git-time ~/bin/git-time
   
 Restart terminal and run `git-time` or `~/bin/git-time`.
 
