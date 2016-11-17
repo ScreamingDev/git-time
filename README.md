@@ -40,7 +40,7 @@ Might be all. Did I miss something?
 
 ## Installation
 
-Global composer package or ...
+Global composer package (`composer global require sourcerer-mike/git-time`) or ...
 
     mkdir ~/opt
     cd ~/opt
