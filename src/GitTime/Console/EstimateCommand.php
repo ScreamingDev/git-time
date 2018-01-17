@@ -58,6 +58,13 @@ class EstimateCommand extends Command
             1800
         );
 
+	    $this->addOption(
+		    'me',
+		    null,
+		    InputOption::VALUE_NONE,
+		    'Show only your commits'
+	    );
+
         $this->addOption(
             'no-parent-time',
             null,
@@ -85,10 +92,17 @@ class EstimateCommand extends Command
     {
 
         $topLevel = $this->getBaseDir();
+        $git = $this->getGit();
 
         $defaultLogArguments = ['log', '--no-merges', '--reverse'];
         $logArguments        = $defaultLogArguments;
         $logArguments[]      = '--pretty=%p %h %cI %s';
+
+        if ($input->getOption('me')) {
+        	$git->run(['config', 'user.name']);
+            $logArguments[]      = '--author';
+            $logArguments[]      = trim($git->getOutput());
+        }
 
         $parentLogArguments   = $defaultLogArguments;
         $parentLogArguments[] = '--pretty=%h %cI %s';
@@ -112,7 +126,6 @@ class EstimateCommand extends Command
             }
         }
 
-        $git = $this->getGit();
         $git->clearOutput();
         $git->run($logArguments);
 

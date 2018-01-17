@@ -1,7 +1,7 @@
 # git time
 
 - How much does that **feature cost**? `git time src/feature/path` 
-- What did I do **today**? `git time -v --since=yesterday`
+- What did I do **today**? `git time --me -v --since=yesterday`
 - Did we **invoice** everything? `git time -v --since="end of last month"`
 
 The `-v` gives you a nice table showing the time spend on each commit.
