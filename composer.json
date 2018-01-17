@@ -1,6 +1,6 @@
 {
   "name": "sourcerer-mike/git-time",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "bin": [
     "src/git-time"
   ],
@@ -11,7 +11,7 @@
   },
   "require": {
     "cpliakas/git-wrapper": "~1",
-    "symfony/console": "~3",
-    "symfony/finder": "~3"
+    "symfony/console": "~3|~4",
+    "symfony/finder": "~3|~4"
   }
 }
