@@ -51,10 +51,18 @@ class EstimateCommand extends Command
         );
 
         $this->addOption(
+            'max',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Maximum time to add to a commit',
+            1800
+        );
+
+        $this->addOption(
             'no-parent-time',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Time to assign to commits without a parent',
+            'Time to assign to commits without a parent commit',
             1
         );
 
@@ -123,7 +131,15 @@ class EstimateCommand extends Command
         ];
 
         $logParsed = [];
-        $maxInvest = $input->getOption('max-invest');
+
+        $maxInvest = $input->getOption('max');
+        if ($input->getParameterOption('--max-invest')) {
+	        $maxInvest = $input->getOption('max-invest');
+
+            $output->writeln(
+                '<error>Option --max-invest is deprecated. Please use --max instead.</error>'
+            );
+        }
 
         // remove all empty lines, otherwise the parser will crash
         $log = array_filter($log);
