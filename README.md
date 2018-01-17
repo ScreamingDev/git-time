@@ -1,5 +1,12 @@
 # git time
 
+Install it globally:
+
+   composer global require sourcerer-mike/git-time
+   
+   # Do you have your composer bin accessible? If not ...
+   echo 'PATH=$PATH:~/.config/composer/vendor/bin' >> ~/.bashrc
+
 ## Estimate the time taken on a project or feature
 
 Check how long you took for that?
