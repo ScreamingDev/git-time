@@ -1,6 +1,5 @@
 {
   "name": "sourcerer-mike/git-time",
-  "version": "0.2.0",
   "bin": [
     "src/git-time"
   ],
